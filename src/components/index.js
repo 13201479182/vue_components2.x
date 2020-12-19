@@ -1,12 +1,13 @@
 
     import Vue from "vue";
     // 引入组件依赖的样式表
-    import "../../assets/css/style.scss";
+    import "../assets/scss/style.scss";
 
-    // 引入组件且塞入components数组中
-    import "./drag-dialog/global.js";
-    import DragDialog from "./drag-dialog/DragDialog.vue";
+    // 拖拽弹框组件的引入
+    import "./DragDialog/lib/extend.js";
+    import DragDialog from "./DragDialog/index.vue";
 
+    // 将引入的组件放入组件数组中
     const components = [
         DragDialog
     ];

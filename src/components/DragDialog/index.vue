@@ -4,7 +4,7 @@
              :style="{zIndex: index}"
              v-show="visible" 
              ref="dialog"
-             @click="active"
+             @click="click"
              v-drag="draggable && dragNodeIsParent">
             <!-- 输入框用于为当前dialog绑定键盘事件 -->
             <input type="text" ref="input" maxlength="0">
@@ -29,17 +29,44 @@
             <div class="footer">
                 <slot name="footer"></slot>
             </div>
+
+            <!-- 弹框8个缩放顶点配置 -->
+            <div class="dots" 
+                 v-if="scaleable"
+                 v-show="isShowDots">
+                <div class="dot1"></div>
+                <div class="dot2"></div>
+                <div class="dot3"></div>
+                <div class="dot4"></div>
+                <div class="dot5"></div>
+                <div class="dot6"></div>
+                <div class="dot7"></div>
+                <div class="dot8"></div>   
+            </div>
+
+            <!-- 默认菜单 TODO: 删除仅在缩放弹框-->
+            <ContextMenu v-if="scaleable && isShowContextMenu"
+                         :position="contextMenuPosition"
+                         :scaleable="scaleable"
+                         :isShowDots.sync="isShowDots">
+            </ContextMenu>
         </div>
     </transition>
 </template>
 
 <script>
-    import directive from './directive';
+    import $ from "jquery";
+    import directive from "./lib/directive.js";
+    import ContextMenu from "./children/ContextMenu.vue";
 
     export default {
         name: "DragDialog",
-
+        
         mixins: [directive],
+
+        components: {
+            ContextMenu
+        },
 
         props: {
             // 是否显示弹出框
@@ -73,7 +100,7 @@
                 default: false
             },
             // 弹框是否支持顶点缩放
-            scale: {
+            scaleable: {
                 type: Boolean,
                 default: false
             }
@@ -81,7 +108,14 @@
 
         data() {
             return {
-                index: null           
+                // 当前组件的层级
+                index: 0,
+                // 是否显示拖拽顶点
+                isShowDots: true,
+
+                // 菜单控制项数据
+                isShowContextMenu: false,
+                contextMenuPosition: []      
             };
         },
 
@@ -108,6 +142,17 @@
                 this.$destroy();
             },
 
+            // 重载默认菜单
+            oveloadContextMenu(position) {
+                // 销毁默认菜单,重置坐标位置
+                this.isShowContextMenu = false;
+                this.contextMenuPosition = position;
+                this.$nextTick(() => {
+                    // 下一次dispatch开启默认菜单
+                    this.isShowContextMenu = true;
+                });
+            },
+
             // 当前组件点击时处于激活状态
             active() {
                 // 层级置上
@@ -116,6 +161,16 @@
                 this.$nextTick(() => {
                     this.$refs.input.focus();
                 });
+            },
+
+            // 当前弹框点击时触发的事件
+            click() {
+                // 激活当前菜单
+                this.active();
+                // 在默认菜单开启的情况下关闭
+                if (this.isShowContextMenu) {
+                    this.isShowContextMenu = false;
+                };
             },
 
             // 初始化事件
@@ -130,6 +185,17 @@
                             default: break;
                         };
                     }, false);
+
+                // 绑定鼠标右击事件   
+                this.$refs["dialog"]
+                    .addEventListener("contextmenu", e => {
+                        // 组件右键默认行为
+                        e.preventDefault();
+                        // 重载默认菜单组件,且计算默认菜单应该的偏移量
+                        var ol = this.$refs["dialog"].offsetLeft,
+                            ot = this.$refs["dialog"].offsetTop;
+                        this.oveloadContextMenu([e.clientX-ol, e.clientY-ot]);
+                    }, false)
             }
         },
 
@@ -171,7 +237,6 @@
 <style lang="scss" scoped>
     .global-drag-dialog {
         position: fixed;
-        z-index: 9999;
         user-select: none;
         top: 22vh;
         left: calc(50% - 20vw);

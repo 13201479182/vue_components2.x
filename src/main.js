@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 
 // 引入全局组件
-import "./components/common"
+import "./components";
 
 Vue.config.productionTip = false
 

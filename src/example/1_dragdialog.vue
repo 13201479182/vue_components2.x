@@ -8,7 +8,7 @@
 			4  draggable          ->			Boolean			默认true表示当前实例的弹框可以拖拽
 			5> dragNodeIsParent	  ->            Boolean			默认是false,代表头部可以拖拽
 			6> dragPosIsOverDoc	  ->  		    Boolean			默认是false,代表弹框是否可以可以拖拽出文档边界
-			6> scale	  		  ->  		    Boolean			默认是false,代表弹框是不可以缩放
+			6> scaleable	  	  ->  		    Boolean			默认是false,代表弹框是不可以缩放尺寸
 
 			预定义事件:	
 			1> beforeOpen		  弹框打开前的回调(第二次打开至往后生效)
@@ -78,7 +78,7 @@
 		<DragDialog class="example4"
 					:visible.sync="examples[3].isShow"
 					title="example4"
-					:scale="true"
+					:scaleable="true"
 					@beforeOpen="beforeOpen"
 					@beforeClose="beforeClose">
 			<div class="content">支持头部拖拽,同时支持弹框边界9个顶点控制弹框大小</div>

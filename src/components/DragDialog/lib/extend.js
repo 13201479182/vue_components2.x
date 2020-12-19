@@ -1,7 +1,8 @@
 
     import Vue from "vue";
     /***
-     * 多拖拽弹框维护函数
+     * 拖拽弹框维护类
+     * 绑定此类的实例至vue原型上,便于后续扩展
      */
     class DragDialogs {
 
