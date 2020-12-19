@@ -1,7 +1,7 @@
 
     import Vue from "vue";
     // 引入组件依赖的样式表
-    import "../../assets/css/style.css";
+    import "../../assets/css/style.scss";
 
     // 引入组件且塞入components数组中
     import "./drag-dialog/global.js";

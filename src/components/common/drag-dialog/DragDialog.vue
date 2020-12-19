@@ -71,6 +71,11 @@
             dragPosIsOverDoc: {
                 type: Boolean,
                 default: false
+            },
+            // 弹框是否支持顶点缩放
+            scale: {
+                type: Boolean,
+                default: false
             }
         },
 
@@ -81,34 +86,36 @@
         },
 
         methods: {
-            // 当前组件点击时处于激活状态
-            active() {
-                // 当前实例的index依据维护类自加1
-                this.index = this.$dragDialogs.index++;
-                // 当视图中出现多个弹框时,针对具体的弹框需要需要具体的处理
-                this.$refs.input.focus();
-            },
-
-            // 打开弹框
+            // 对外提供打开当前弹框的方法
             open() {
-                // 打开弹框前应做的处理
-                if (this.$listeners.beforeOpen) {
-                    this.$emit("beforeOpen");
+                // 打开弹框
+                if (this.visible) {
+                    // 弹框若以打开则只需激活即可
+                    this.active();
+                }else {
+                    this.$emit("update:visible", true);
                 };
-
-                // 打开当前弹框
-                this.$emit("update:visible", true);
             },
 
-            // 关闭弹框
+            // 对外提供关闭当前弹框的方法
             close() {
-                // 关闭弹框前应做的处理
-                if (this.$listeners.beforeClose) {
-                    this.$emit("beforeClose");
-                };
-
                 // 关闭当前弹框
                 this.$emit("update:visible", false);
+            },
+
+            // 对外提供销毁当前弹框的方法
+            destroy() {
+                this.$destroy();
+            },
+
+            // 当前组件点击时处于激活状态
+            active() {
+                // 层级置上
+                this.index = this.$dragDialogs.index++;
+                // 下一次dispatch时自动聚焦
+                this.$nextTick(() => {
+                    this.$refs.input.focus();
+                });
             },
 
             // 初始化事件
@@ -135,25 +142,26 @@
         },
 
         mounted() {
+            // 首次打开弹框自动激活
+            this.active();
             // 初始化当前组件的事件
             this.initEvents();
-            // 首次打开弹框获取焦点
-            this.active();
         },
 
         watch: {
             visible(newVal) {
                 if (newVal) {
-                    /***
-                     * 第二次(含之后)弹框打开前应做的处理
-                     * 1>触发打开弹框前的回调
-                     * 2>下一次dispatch渲染弹框
-                     * 3>获取焦点,便于esc退出
-                     */
-                    this.open();
-                    this.$nextTick(() => {
-                        this.$refs.input.focus();
-                    })
+                    // 打开前回调
+                    if (this.$listeners.beforeOpen) {
+                        this.$emit("beforeOpen");
+                    };
+                    // 当弹框显示时自动激活
+                    this.active();
+                }else {
+                    // 关闭前回调
+                    if (this.$listeners.beforeClose) {
+                        this.$emit("beforeClose");
+                    };
                 }
             }
         }
@@ -164,10 +172,12 @@
     .global-drag-dialog {
         position: fixed;
         z-index: 9999;
-        top: 20vh;
-        left: calc(50% - 25vw);
-        width: 30vw;
         user-select: none;
+        top: 22vh;
+        left: calc(50% - 20vw);
+        /*弹框默认大小配置*/
+        width: 40vw;
+        height: 50vh;
         >input {
             position: absolute;
             left: 0;
@@ -183,8 +193,8 @@
             color: #b0d3ff;
             text-align: left;
             background: #374677;
-            height: 32px;
-            line-height: 32px;
+            height: 30px;
+            line-height: 30px;
             .close {
                 margin-top: 8px;
                 margin-right: 4px;
@@ -201,6 +211,20 @@
                 height: 24px;
                 background-image: url(~@/assets/img/drag_dialog_close_hover.png);
             }
+        }
+        .content {
+            width: 100%;
+            height: calc(100% - 130px);
+            overflow-y: auto;
+            background: lightgoldenrodyellow;
+            
+        }
+        .footer {
+            padding: 15px 0px;
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            background: #374677;
         }
     } 
 </style>
