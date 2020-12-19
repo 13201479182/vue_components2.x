@@ -4,6 +4,7 @@
     import "../../assets/css/style.css";
 
     // 引入组件且塞入components数组中
+    import "./drag-dialog/global.js";
     import DragDialog from "./drag-dialog/DragDialog.vue";
 
     const components = [

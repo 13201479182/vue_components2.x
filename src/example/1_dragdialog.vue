@@ -2,11 +2,12 @@
 	<div class="drag-dialog-use-example">
 		<!-- 
 			可配置属性:
-			1> visible -> 			Boolean 		是否显示弹出框,默认隐藏
-			2> title   -> 			String			弹框标题,默认弹出框
-			3> ecs     -> 			Boolean			用于配置层是否需要通过esc键关闭,默认true
-			4> dragNodeIsParent	    Boolean			默认是false,代表头部可以拖拽
-			4> dragPosIsOverDoc	    Boolean			默认是false,代表弹框是否可以可以拖拽出文档边界
+			1> visible           -> 			Boolean 		是否显示弹出框,默认隐藏
+			2> title             -> 			String			弹框标题,默认弹出框
+			3> ecs               -> 			Boolean			默认true表示可以通过esc按键关闭选中的弹框
+			4  draggable          ->			Boolean			默认true表示当前实例的弹框可以拖拽
+			5> dragNodeIsParent	 ->             Boolean			默认是false,代表头部可以拖拽
+			6> dragPosIsOverDoc	 ->  		    Boolean			默认是false,代表弹框是否可以可以拖拽出文档边界
 
 			预定义事件:	
 			1>beforeOpen					弹框打开前的回调(第二次打开至往后生效)
@@ -18,39 +19,53 @@
 
 			注意点: 想更改弹框样式,直接赋予组件类名,修改类名对应样式即可
 		 -->
-		<a @click="isShowDialog = true">打开弹框</a>
 
-		<!-- 使用全局拖拽组件 -->
-		<DragDialog class="layers"
-					:visible.sync="isShowDialog"
-					:title="title"
-					:dragNodeIsParent="dragNodeIsParent"
-					:dragPosIsOverDoc="dragPosIsOverDoc"
+		<!-- 案例1 不支持拖拽的弹框 -->
+		<DragDialog class="example1"
+					:visible.sync="example1.isShow"
+					title="example1"
+					:draggable="false"
 					@beforeOpen="beforeOpen"
 					@beforeClose="beforeClose">
 			<!-- 默认内容插槽 -->
-			<div class="content">支持头部拖拽</div>
+			<div class="content">当前弹框不支持拖拽</div>
 
 			<!-- 底部操作按钮插槽 -->
 			<template v-slot:footer>
 				<div class="operations">
-					tip: 不支持越界
+					操作区域
 				</div>
 			</template>
 		</DragDialog>
 
-		<DragDialog class="layers_test"
-					:visible.sync="testShow"
-					title="layers_test"
-					:dragNodeIsParent="true"
+		<!-- 案例2 支持拖拽头部,且可以越界的弹框 -->
+		<DragDialog class="example2"
+					:visible.sync="example2.isShow"
+					title="example2"
 					:dragPosIsOverDoc="true"
 					@beforeOpen="beforeOpen"
 					@beforeClose="beforeClose">
-			<div class="content">支持整体拖拽</div>
+			<div class="content">当前弹框仅支持头部区域拖拽,且可以拖拽出视窗</div>
 
 			<template v-slot:footer>
 				<div class="operations">
-					tip: 支持越界
+					操作区域
+				</div>
+			</template>
+		</DragDialog>
+
+		<!-- 案例3 支持整体拖拽,且不可以越界的弹框 -->
+		<DragDialog class="example3"
+					:visible.sync="example3.isShow"
+					title="example3"
+					:dragNodeIsParent="true"
+					@beforeOpen="beforeOpen"
+					@beforeClose="beforeClose">
+			<div class="content">当前弹框仅全身区域拖拽,且不可以拖拽出视窗</div>
+
+			<template v-slot:footer>
+				<div class="operations">
+					操作区域
 				</div>
 			</template>
 		</DragDialog>
@@ -63,12 +78,18 @@
 
 		data() {
 			return {
-				isShowDialog: true,
-				title: "图层管理",
-				dragNodeIsParent: false,
-				dragPosIsOverDoc: false,
-
-				testShow: true
+				// 案例1
+				example1: {
+					isShow: true
+				},
+				// 案例2
+				example2: {
+					isShow: true
+				},
+				// 案例3
+				example3: {
+					isShow: true
+				}
 			}
 		},
 
@@ -88,12 +109,18 @@
 <style scoped lang="scss">
 	// 样式修改示例
 	.drag-dialog-use-example {
-		.layers {
-			// 注意点: 在修改位置时,请使用top和left去层叠默认的
-			top: 150px;
-		}
-		.layers_test {
+		// 注意点: 在修改位置时,请使用top和left去层叠默认的
+		.example1 {
+			top: 50px;
 			left: 100px;
+		}
+		.example2 {
+			top: 250px;
+			left: 700px;
+		}
+		.example3 {
+			top: 450px;
+			left: 1300px;
 		}
 		// 插槽内容样式在父组件配置
 		.content {

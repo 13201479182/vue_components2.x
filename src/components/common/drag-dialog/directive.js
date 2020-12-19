@@ -1,6 +1,5 @@
 
     import $ from "jquery";
-    import defend from "./defend";
 
     export default {
         directives: {
@@ -45,7 +44,7 @@
                             // 阻止事件冒泡
                             e.stopPropagation();
                             // 层级置顶
-                            vnode.context.index = defend.index++;
+                            vnode.context.index = vm.$dragDialogs.index++;
                             // 拖拽鼠标图标设置
                             $el.css({
                                 cursor: "move"

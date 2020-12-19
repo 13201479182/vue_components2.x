@@ -5,12 +5,12 @@
              v-show="visible" 
              ref="dialog"
              @click="active"
-             v-drag="dragNodeIsParent">
+             v-drag="draggable && dragNodeIsParent">
             <!-- 输入框用于为当前dialog绑定键盘事件 -->
             <input type="text" ref="input" maxlength="0">
 
             <!-- 弹框头部区域 -->
-            <div class="header" v-drag="!dragNodeIsParent">
+            <div class="header" v-drag="draggable && !dragNodeIsParent">
                 <!-- 头部标题区域 -->
                 <span class="title">
                     {{ title }}
@@ -35,7 +35,6 @@
 
 <script>
     import directive from './directive';
-    import defend from "./defend"; 
 
     export default {
         name: "DragDialog",
@@ -55,6 +54,11 @@
             },
             // 是否支持esc关闭当前弹框
             esc: {
+                type: Boolean,
+                default: true
+            },
+            // 弹框是否支持拖拽
+            draggable: {
                 type: Boolean,
                 default: true
             },
@@ -80,7 +84,7 @@
             // 当前组件点击时处于激活状态
             active() {
                 // 当前实例的index依据维护类自加1
-                this.index = defend.index++;
+                this.index = this.$dragDialogs.index++;
                 // 当视图中出现多个弹框时,针对具体的弹框需要需要具体的处理
                 this.$refs.input.focus();
             },
@@ -125,9 +129,9 @@
         created() {
             /**
              * 添加当前实例至维护对象中
-             * 然后就可以通过维护对象统一控制所有该方法添加的弹框
+             * 然后就可以通过维护对象统一控制所有该组件创建的弹框
              */
-            defend.addDragDialog(this);
+            this.$dragDialogs.addDialog(this);
         },
 
         mounted() {
@@ -150,9 +154,6 @@
                     this.$nextTick(() => {
                         this.$refs.input.focus();
                     })
-                }else {
-                    // 在父组件通过修改显隐值为false时触发
-                    this.close();
                 }
             }
         }
