@@ -17,7 +17,7 @@
                 </span>
 
                 <!-- 肉步图标区域 -->
-                <span class="close" title="关闭" @click="close"></span>
+                <span class="close" title="关闭" @click="closeDialog"></span>
             </div>
 
             <!-- 弹框内容区域 -->
@@ -33,22 +33,23 @@
             <!-- 弹框8个缩放顶点配置 -->
             <div class="dots" 
                  v-if="scaleable"
-                 v-show="isShowDots">
-                <div class="dot1"></div>
-                <div class="dot2"></div>
-                <div class="dot3"></div>
-                <div class="dot4"></div>
-                <div class="dot5"></div>
-                <div class="dot6"></div>
-                <div class="dot7"></div>
-                <div class="dot8"></div>   
+                 :style="isShowDots ? {opacity: 1} : {opacity: 0}">
+                <div class="dot1" ref="dot1"></div>
+                <div class="dot2" ref="dot2"></div>
+                <div class="dot3" ref="dot3"></div>
+                <div class="dot4" ref="dot4"></div>
+                <div class="dot5" ref="dot5"></div>
+                <div class="dot6" ref="dot6"></div>
+                <div class="dot7" ref="dot7"></div>
+                <div class="dot8" ref="dot8"></div>   
             </div>
 
-            <!-- 默认菜单 TODO: 删除仅在缩放弹框-->
-            <ContextMenu v-if="scaleable && isShowContextMenu"
+            <!-- 默认菜单-->
+            <ContextMenu v-if="isHasOwnMenu && isShowContextMenu"
                          :position="contextMenuPosition"
                          :scaleable="scaleable"
-                         :isShowDots.sync="isShowDots">
+                         :isShowDots.sync="isShowDots"
+                         :isShowContextMenu.sync="isShowContextMenu">
             </ContextMenu>
         </div>
     </transition>
@@ -99,6 +100,11 @@
                 type: Boolean,
                 default: false
             },
+            // 是否启用组件自带的右键菜单
+            isHasOwnMenu: {
+                type: Boolean,
+                default: true
+            },
             // 弹框是否支持顶点缩放
             scaleable: {
                 type: Boolean,
@@ -111,9 +117,9 @@
                 // 当前组件的层级
                 index: 0,
                 // 是否显示拖拽顶点
-                isShowDots: true,
+                isShowDots: false,
 
-                // 菜单控制项数据
+                // 所有弹框都配有右键菜单,只是显示与隐藏,存在和不存在的关系
                 isShowContextMenu: false,
                 contextMenuPosition: []      
             };
@@ -121,7 +127,7 @@
 
         methods: {
             // 对外提供打开当前弹框的方法
-            open() {
+            openDialog() {
                 // 打开弹框
                 if (this.visible) {
                     // 弹框若以打开则只需激活即可
@@ -132,14 +138,19 @@
             },
 
             // 对外提供关闭当前弹框的方法
-            close() {
+            closeDialog() {
                 // 关闭当前弹框
                 this.$emit("update:visible", false);
             },
 
             // 对外提供销毁当前弹框的方法
-            destroy() {
+            destroyDialog() {
                 this.$destroy();
+            },
+
+            // 对外关闭当前弹框对应菜单的方法
+            closeContextMenu() {
+                this.isShowContextMenu = false;
             },
 
             // 重载默认菜单
@@ -180,22 +191,45 @@
                     .addEventListener("keydown", e => {
                         // 处理esc键码,关闭弹框
                         switch(e.keyCode) {
-                            case 27: this.esc ? this.close() : false;
+                            case 27: this.esc ? this.closeDialog() : false;
                             break;
                             default: break;
                         };
                     }, false);
 
-                // 绑定鼠标右击事件   
-                this.$refs["dialog"]
-                    .addEventListener("contextmenu", e => {
-                        // 组件右键默认行为
-                        e.preventDefault();
-                        // 重载默认菜单组件,且计算默认菜单应该的偏移量
-                        var ol = this.$refs["dialog"].offsetLeft,
-                            ot = this.$refs["dialog"].offsetTop;
-                        this.oveloadContextMenu([e.clientX-ol, e.clientY-ot]);
-                    }, false)
+                // 在开发人员配置了默认菜单的前提下,绑定此事件
+                if (this.isHasOwnMenu) {  
+                    this.$refs["dialog"]
+                        .addEventListener("contextmenu", e => {
+                            // 组件右键默认行为
+                            e.preventDefault();
+                            // 重载默认菜单组件,且计算默认菜单应该的偏移量
+                            var ol = this.$refs["dialog"].offsetLeft,
+                                ot = this.$refs["dialog"].offsetTop;
+                            this.oveloadContextMenu([e.clientX-ol, e.clientY-ot]);
+                        }, false);
+                };
+
+                // 在开发人员配置弹框支持大小缩放的前提下,绑定此事件
+                if (this.scaleable) {
+                    var dotsEle = [];
+                    // dotsEle添加八个顶点,便于添加事件
+                    for (var i=1,l=9; i<l; i++) {
+                        dotsEle.push(this.$refs[`dot${i}`]);
+                    };
+                    // 初始化缩放顶点的鼠标经过事件
+                    dotsEle.forEach(dot => {
+                        dot.onmouseover = e => {
+                            // 显示顶点坐标
+                            this.isShowDots = true;
+                        };
+                        dot.onmouseout = e => {
+                            // 显示顶点坐标
+                            this.isShowDots = false;
+                        };
+                    });
+                    // 初始化顶点坐标对应的缩放事件
+                };
             }
         },
 
