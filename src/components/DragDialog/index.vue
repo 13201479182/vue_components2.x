@@ -1,8 +1,8 @@
 <template>
     <transition name="drag-dialog">
         <div class="global-drag-dialog" 
-             :style="{zIndex: index}"
              v-show="visible" 
+             :style="{zIndex: index}"
              ref="dialog"
              @click="click"
              v-drag="draggable && dragNodeIsParent">
@@ -59,6 +59,14 @@
     import $ from "jquery";
     import directive from "./lib/directive.js";
     import ContextMenu from "./children/ContextMenu.vue";
+    // 获取顶点缩放对应的功能函数
+    import {
+        initDotTopLeftEvent,
+        initDotTopCenterEvent,
+        initDotTopRightEvent,
+        bindCancelMouseMove,
+        destroyDotsEvents
+    } from "./lib/common.js";
 
     export default {
         name: "DragDialog",
@@ -114,10 +122,12 @@
 
         data() {
             return {
+                // 是否渲染当前组件
+                isRender: true,
                 // 当前组件的层级
                 index: 0,
                 // 是否显示拖拽顶点
-                isShowDots: false,
+                isShowDots: true,
 
                 // 所有弹框都配有右键菜单,只是显示与隐藏,存在和不存在的关系
                 isShowContextMenu: false,
@@ -143,25 +153,19 @@
                 this.$emit("update:visible", false);
             },
 
-            // 对外提供销毁当前弹框的方法
-            destroyDialog() {
-                this.$destroy();
-            },
-
             // 对外关闭当前弹框对应菜单的方法
             closeContextMenu() {
                 this.isShowContextMenu = false;
             },
 
-            // 重载默认菜单
-            oveloadContextMenu(position) {
-                // 销毁默认菜单,重置坐标位置
-                this.isShowContextMenu = false;
-                this.contextMenuPosition = position;
-                this.$nextTick(() => {
-                    // 下一次dispatch开启默认菜单
-                    this.isShowContextMenu = true;
-                });
+            // 对外提供重载当前弹框的方法
+            overloadComponent() {
+                this.$forceUpdate();
+            },
+
+            // 对外提供销毁当前弹框的方法
+            destroyDialog() {
+                this.$destroy();
             },
 
             // 当前组件点击时处于激活状态
@@ -184,51 +188,65 @@
                 };
             },
 
+            // 为每一个顶点添加具体的事件功能
+            initDotsEvevnt() {
+                // 1>绑定左上顶点对应的事件
+                initDotTopLeftEvent(this);
+                // 2>绑定左正上顶点对应的事件
+                initDotTopCenterEvent(this);
+                // 3>绑定右上顶点对应的事件
+                initDotTopRightEvent(this);
+
+                bindCancelMouseMove();
+            },
+
             // 初始化事件
             initEvents() {
+                /***
+                 * 使用dom0级事件处理程序确保节点移除,事件自动注销
+                 * 未确定问题: dom2级事件是否会随节点移除而自动移除(内存泄露)
+                 */
                 // 绑定键盘事件
                 this.$refs["input"]
-                    .addEventListener("keydown", e => {
+                    .onkeydown = e => {
                         // 处理esc键码,关闭弹框
                         switch(e.keyCode) {
                             case 27: this.esc ? this.closeDialog() : false;
                             break;
                             default: break;
                         };
-                    }, false);
+                    };
 
                 // 在开发人员配置了默认菜单的前提下,绑定此事件
                 if (this.isHasOwnMenu) {  
                     this.$refs["dialog"]
-                        .addEventListener("contextmenu", e => {
+                        .oncontextmenu = e => {
                             // 组件右键默认行为
                             e.preventDefault();
                             // 重载默认菜单组件,且计算默认菜单应该的偏移量
                             var ol = this.$refs["dialog"].offsetLeft,
                                 ot = this.$refs["dialog"].offsetTop;
-                            this.oveloadContextMenu([e.clientX-ol, e.clientY-ot]);
-                        }, false);
+                            // 显示默认菜单
+                            this.contextMenuPosition = [e.clientX-ol, e.clientY-ot];
+                            this.isShowContextMenu = true;
+                        };
                 };
 
                 // 在开发人员配置弹框支持大小缩放的前提下,绑定此事件
                 if (this.scaleable) {
-                    var dotsEle = [];
-                    // dotsEle添加八个顶点,便于添加事件
-                    for (var i=1,l=9; i<l; i++) {
-                        dotsEle.push(this.$refs[`dot${i}`]);
+                    // dotsEle八个顶点 初始化缩放顶点的鼠标经过事件
+                    for (let i=1,l=9; i<l; i++) {
+                        // 鼠标经过显示顶点
+                        this.$refs[`dot${i}`]  
+                            .onmouseover = e => {
+                                this.isShowDots = true;
+                                // 关闭默认菜单
+                                this.isShowContextMenu = false;
+                            };
                     };
-                    // 初始化缩放顶点的鼠标经过事件
-                    dotsEle.forEach(dot => {
-                        dot.onmouseover = e => {
-                            // 显示顶点坐标
-                            this.isShowDots = true;
-                        };
-                        dot.onmouseout = e => {
-                            // 显示顶点坐标
-                            this.isShowDots = false;
-                        };
-                    });
-                    // 初始化顶点坐标对应的缩放事件
+
+                    // 初始化缩放顶点对应的具体事件
+                    this.initDotsEvevnt();
                 };
             }
         },
@@ -272,6 +290,11 @@
     .global-drag-dialog {
         position: fixed;
         user-select: none;
+        /*
+            弹框缩放的最大最小尺寸在此处更改
+        */
+        min-width: 400px;
+        min-height: 300px;
         top: 22vh;
         left: calc(50% - 20vw);
         /*弹框默认大小配置*/
@@ -316,6 +339,7 @@
             height: calc(100% - 130px);
             overflow-y: auto;
             background: lightgoldenrodyellow;
+            position: relative;
             
         }
         .footer {

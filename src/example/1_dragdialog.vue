@@ -7,15 +7,18 @@
 			3> ecs                -> 			Boolean			默认true表示可以通过esc按键关闭选中的弹框
 			4  draggable          ->			Boolean			默认true表示当前实例的弹框可以拖拽
 			5> dragNodeIsParent	  ->            Boolean			默认是false,代表头部可以拖拽
-			6> dragPosIsOverDoc	  ->  		    Boolean			默认是false,代表弹框是否可以可以拖拽出文档边界
-			7> isHasOwnMenu		  ->            Boolean			默认为true,代表弹框初始化自带右键自定义菜单
-			8> scaleable	  	  ->  		    Boolean			默认是false,代表弹框是不可以缩放尺寸
+			6> dragPosIsOverDoc	  ->  		    Boolean			默认是false,代表弹框是不可以可以拖拽出文档边界
+			7> isHasOwnMenu		  ->            Boolean			默认为true,代表弹框初始化自带右键自定义菜单 
+			9> scaleable	  	  ->  		    Boolean			默认是false,代表弹框是不可以缩放尺寸
 
 			预定义事件:	
 			1> beforeOpen		  弹框打开前的回调(第二次打开至往后生效)
 			2> beforeClose		  弹框关闭前的回调(整个过程生效)
 
 			注意点: 想更改弹框样式,直接赋予组件类名,修改类名对应样式即可,在修改位置时请使用top和left去层叠默认样式
+
+			建议: 
+				1> 使用缩放配置scaleable时,请将dragPosIsOverDoc设置为true,体验更佳
 		 -->
 		<ul>
 			<li v-for="item in examples"
