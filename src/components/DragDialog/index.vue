@@ -16,7 +16,7 @@
                     {{ title }}
                 </span>
 
-                <!-- 肉步图标区域 -->
+                <!-- 关闭图标区域 -->
                 <span class="close" title="关闭" @click="closeDialog"></span>
             </div>
 
@@ -64,8 +64,13 @@
         initDotTopLeftEvent,
         initDotTopCenterEvent,
         initDotTopRightEvent,
+        initDotLeftCenterEvent,
+        initDotRightCenterEvent,
+        initDotLeftBottomEvent,
+        initDotCenterBottomEvent,
+        initDotBottomLeftEvent,
         bindCancelMouseMove,
-        destroyDotsEvents
+        destroyOwnEvents,
     } from "./lib/common.js";
 
     export default {
@@ -122,8 +127,6 @@
 
         data() {
             return {
-                // 是否渲染当前组件
-                isRender: true,
                 // 当前组件的层级
                 index: 0,
                 // 是否显示拖拽顶点
@@ -158,14 +161,15 @@
                 this.isShowContextMenu = false;
             },
 
-            // 对外提供重载当前弹框的方法
-            overloadComponent() {
-                this.$forceUpdate();
-            },
-
-            // 对外提供销毁当前弹框的方法
+            // 对外提供永久关闭(销毁)当前弹框的方法
             destroyDialog() {
-                this.$destroy();
+                // 关闭当前窗口
+                this.closeDialog();
+                // 下一次dom更新后再销毁此组件
+                this.$nextTick(() => {
+                    // 销毁组件
+                    this.$destroy();
+                });
             },
 
             // 当前组件点击时处于激活状态
@@ -191,12 +195,54 @@
             // 为每一个顶点添加具体的事件功能
             initDotsEvevnt() {
                 // 1>绑定左上顶点对应的事件
-                initDotTopLeftEvent(this);
+                initDotTopLeftEvent(
+                    $( this.$refs["dot1"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
                 // 2>绑定左正上顶点对应的事件
-                initDotTopCenterEvent(this);
+                initDotTopCenterEvent(
+                    $( this.$refs["dot2"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
                 // 3>绑定右上顶点对应的事件
-                initDotTopRightEvent(this);
-
+                initDotTopRightEvent(
+                    $( this.$refs["dot3"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 4>绑定左中顶点对应的事件
+                initDotLeftCenterEvent(
+                    $( this.$refs["dot4"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 5>绑定右中顶点对应的事件
+                initDotRightCenterEvent(
+                    $( this.$refs["dot5"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 6>绑定右下顶点对应的事件
+                initDotLeftBottomEvent(
+                    $( this.$refs["dot6"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 7>绑定下中顶点对应的事件
+                initDotCenterBottomEvent(
+                    $( this.$refs["dot7"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 8>绑定右下顶点对应的事件
+                initDotBottomLeftEvent(
+                    $( this.$refs["dot8"] ),
+                    $( this.$refs["dialog"] ),
+                    this.active
+                );
+                // 绑定撤销鼠标移动事件,全弹框通用
                 bindCancelMouseMove();
             },
 
@@ -266,6 +312,13 @@
             this.initEvents();
         },
 
+        beforeDestroy() {
+            // 销毁当前组件绑定的缩放相关jq事件
+            if (this.scaleable) {
+                destroyOwnEvents(this.$refs);
+            };
+        },
+
         watch: {
             visible(newVal) {
                 if (newVal) {
@@ -291,7 +344,7 @@
         position: fixed;
         user-select: none;
         /*
-            弹框缩放的最大最小尺寸在此处更改
+            弹框缩放的最小尺寸在此处更改
         */
         min-width: 400px;
         min-height: 300px;
