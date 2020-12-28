@@ -1,7 +1,7 @@
 
     import Vue from "vue";
     // 引入组件依赖的样式表
-    import "../assets/scss/style.scss";
+    import "./style.scss";
 
     // 拖拽弹框组件的引入
     import "./DragDialog/lib/extend.js";

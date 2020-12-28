@@ -140,36 +140,36 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 	// 样式修改示例
-	.drag-dialog-use-example {
-		// 注意点: 在修改位置时,请使用top和left去层叠默认的
-		.example1 {
-			top: 180px;
-			left: 10px;
-		}
-		.example2 {
-			top: 210px;
-			left: 410px;
-		}
-		.example3 {
-			top: 240px;
-			left: 810px;
-		}
-		.example4 {
-			top: 100px;
-			left: 400px;
-			width: 70vw;
-			height: 60vh;
-		}
-		// 插槽内容样式在父组件配置
-		.content {
-			line-height: 300px;
-		}
-		>ul {
-			li {
-				list-style: none;
-				display: inline-block;
-				margin: 0 30px; 
-			}
-		}
-	}
+	// .drag-dialog-use-example {
+	// 	// 注意点: 在修改位置时,请使用top和left去层叠默认的
+	// 	.example1 {
+	// 		top: 180px;
+	// 		left: 10px;
+	// 	}
+	// 	.example2 {
+	// 		top: 210px;
+	// 		left: 410px;
+	// 	}
+	// 	.example3 {
+	// 		top: 240px;
+	// 		left: 810px;
+	// 	}
+	// 	.example4 {
+	// 		top: 100px;
+	// 		left: 400px;
+	// 		width: 70vw;
+	// 		height: 60vh;
+	// 	}
+	// 	// 插槽内容样式在父组件配置
+	// 	.content {
+	// 		line-height: 300px;
+	// 	}
+	// 	>ul {
+	// 		li {
+	// 			list-style: none;
+	// 			display: inline-block;
+	// 			margin: 0 30px; 
+	// 		}
+	// 	}
+	// }
 </style>

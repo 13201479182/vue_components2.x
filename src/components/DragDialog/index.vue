@@ -376,7 +376,7 @@
                 width: 16px;
                 height: 16px;
                 float: right;
-                background-image: url(~@/assets/img/drag_dialog_close.png);
+                background-image: url(../imgs/drag_dialog_close.png);
             }
             .close:hover {
                 cursor: pointer;
@@ -384,7 +384,7 @@
                 margin-right: 0;
                 width: 24px;
                 height: 24px;
-                background-image: url(~@/assets/img/drag_dialog_close_hover.png);
+                background-image: url(../imgs/drag_dialog_close_hover.png);
             }
         }
         .content {
